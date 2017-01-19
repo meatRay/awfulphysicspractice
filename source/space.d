@@ -16,7 +16,7 @@ class Renderer
 public:
 	Space space;
 	bool running;
-	double updaterate = 0.16;
+	double updaterate = 0.016;
 
 	this()
 	{
@@ -110,7 +110,7 @@ public:
 
 	override void draw(SDL_Renderer* render, int x, int y)
 	{
-		auto rect = SDL_Rect(x,y,64,64);
+		auto rect = SDL_Rect(x,y,32,32);
 		SDL_SetRenderDrawColor( render, r, g, b, 255 );
 		SDL_RenderFillRect( render, &rect );
 	}

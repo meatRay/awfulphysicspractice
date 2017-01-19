@@ -18,7 +18,7 @@ public:
 	vec2d position;
 	double rotation = 0.0;
 	double speed = 0.0;
-	double targetspeed = 10;
+	double targetspeed = 1.0;
 	
 	//Replace hard props with alias into Body access
 	//Chunk managed bounding boxes -- relays impact to data .. allows for event handlers to refresh state of systems
@@ -66,15 +66,15 @@ public:
 		for( int y = 0; y < _tiles.length; ++y )
 			for( int x = 0; x < _tiles[y].length; ++x )
 				if( _tiles[y][x] !is null )
-					_tiles[y][x].render.draw(render, x*64, y*64);
+					_tiles[y][x].render.draw(render, (x*32) + to!int(position.x), (y*32) + to!int(position.y));
 		//foreach( chunk; objects )
 			//chunk.draw(render);
 	}
 	
 	void update( float delta_time )
 	{
-		speed += thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust).sum;
-		
+		speed += thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust * 32).sum;
+		position.y += speed * delta_time;
 		// Really might not be worth it... caching will just make stuff feel slow
 		if( _internalsTime += delta_time > internalsLifetime )
 			updateInternals();	

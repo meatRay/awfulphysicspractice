@@ -8,7 +8,7 @@ import luad.state;
 class Thrust : Tile
 {
 public:
-	double maxThrust = 10.0;
+	double maxThrust = 0.5;
 	
 	@property double thrust(){ return functional ? _atThrust : 0.0; }
 	/+@property double thrustScale (){ return functional ? _atThrust : 0.0; }+/

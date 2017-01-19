@@ -18,11 +18,11 @@ void main()
 
 
 	auto tiles = [ 
-[ new Tile('#'), new Command, new Tile('#') ],
-[ null, new Tile('#'), null ],
-[ new Tile('#'), new Gyro, new Tile('#') ],
+cast(Tile[])[ new Thrust, null, new Thrust ] ,
 [ new Tile('#'), new Tile('#'), new Tile('#') ],
-cast(Tile[])[ new Thrust, null, new Thrust ] ];
+[ new Tile('#'), new Gyro, new Tile('#') ],
+[ null, new Tile('#'), null ],
+[ new Tile('#'), new Command, new Tile('#') ]];
 	auto ch = new Chunk( tiles );
 	writeln( ch.textRender() );
 
