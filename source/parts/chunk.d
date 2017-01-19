@@ -63,11 +63,10 @@ public:
 
 	void draw(RenderContext render)
 	{
-		auto rndr = new BlankRender;
 		for( int y = 0; y < _tiles.length; ++y )
 			for( int x = 0; x < _tiles[y].length; ++x )
 				if( _tiles[y][x] !is null )
-					rndr.draw(render, x*64, y*64);
+					_tiles[y][x].render.draw(render, x*64, y*64);
 		//foreach( chunk; objects )
 			//chunk.draw(render);
 	}

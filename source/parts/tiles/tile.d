@@ -1,12 +1,14 @@
 module ships.parts.tiles.tile;
 
 import ships.scripting;
+import ships.space;
 
 import luad.state;
 
 class Tile
 {
 public:
+	Render render;
 	Script[] scripts;
     TimedScript[] timedScripts;
 	char character;
@@ -30,7 +32,8 @@ public:
         timedScripts = [];
 		character = tile_char;
 		_durability = durability;
-		_damageThreshold = damage_threshold;		
+		_damageThreshold = damage_threshold;
+		render = new BlankRender();	
 	}
 
 	void update( double delta_time )

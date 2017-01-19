@@ -1,6 +1,7 @@
 module ships.parts.tiles.thrust;
 
 import ships.parts.tiles;
+import ships.space;
 
 import luad.state;
 
@@ -33,6 +34,9 @@ public:
 	this()
 	{
 		super('T');
+		auto bsc = cast(BlankRender)this.render;
+		bsc.r = 0;
+		bsc.g = 0;
 	}
 	
     void regLuaCalls( LuaState lua )

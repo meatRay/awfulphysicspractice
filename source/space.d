@@ -96,10 +96,22 @@ public:
 class BlankRender : Render
 {
 public:
+	byte r, g, b;
+	this()
+	{
+		this(cast(byte)255,cast(byte)255,cast(byte)255);
+	}
+	this( byte r, byte g, byte b )
+	{
+		this.r = r;
+		this.g = g;
+		this.b = b;
+	}
+
 	override void draw(SDL_Renderer* render, int x, int y)
 	{
 		auto rect = SDL_Rect(x,y,64,64);
-		SDL_SetRenderDrawColor( render, 0, 0, 255, 255 );
+		SDL_SetRenderDrawColor( render, r, g, b, 255 );
 		SDL_RenderFillRect( render, &rect );
 	}
 }

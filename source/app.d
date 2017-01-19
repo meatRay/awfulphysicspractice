@@ -18,7 +18,7 @@ void main()
 
 
 	auto tiles = [ 
-[ new Tile('#'), new Tile('#'), new Tile('#') ],
+[ new Tile('#'), new Command, new Tile('#') ],
 [ null, new Tile('#'), null ],
 [ new Tile('#'), new Gyro, new Tile('#') ],
 [ new Tile('#'), new Tile('#'), new Tile('#') ],
