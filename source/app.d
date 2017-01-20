@@ -29,5 +29,6 @@ cast(Tile[])[ new Thrust, null, new Thrust ] ,
     auto wndw = new Renderer;
     wndw.space = new Space;
     wndw.space.objects.insert(ch);
+    wndw.space.begin();
     wndw.begin();
 }

@@ -5,6 +5,8 @@ import ships.parts;
 import derelict.sdl2.sdl;
 import derelict.sdl2.types;
 
+import dchip;
+
 import std.container;
 
 import core.thread;
@@ -56,7 +58,7 @@ public:
 			}
 			draw();
 			update();
-			Thread.sleep(delaytime);
+			core.thread.Thread.sleep(delaytime);
 		}
 	}
 
@@ -120,8 +122,19 @@ class Space
 {
 public:
 	SList!Chunk objects;
-	this() {}
-	
+	this() 
+	{
+		_space = cpSpaceNew();
+		cpSpaceSetGravity(_space, cpv(0f, 0f));
+	}
+
+	void begin()
+	{
+		foreach( chunk; objects )
+			cpSpaceAddBody(_space, chunk.physics);
+			
+	}
+
 	void update( float delta_time )
 	{
 		foreach( object; objects )
@@ -133,4 +146,7 @@ public:
 		foreach( chunk; objects )
 			chunk.draw(render);
 	}
+
+private:
+	cpSpace* _space;
 }

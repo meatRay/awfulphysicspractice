@@ -39,7 +39,7 @@ public:
 		bsc.g = 0;
 	}
 	
-    void regLuaCalls( LuaState lua )
+    override void regLuaCalls( LuaState lua )
     {
         lua["thrustscale"] = &thrustScale;
     }

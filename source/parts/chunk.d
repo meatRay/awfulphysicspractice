@@ -5,6 +5,8 @@ import ships.space;
 
 import gl3n.linalg;
 
+import dchip;
+
 import std.array;
 import std.container;
 import std.conv;
@@ -19,6 +21,7 @@ public:
 	double rotation = 0.0;
 	double speed = 0.0;
 	double targetspeed = 1.0;
+	cpBody* physics;
 	
 	//Replace hard props with alias into Body access
 	//Chunk managed bounding boxes -- relays impact to data .. allows for event handlers to refresh state of systems
@@ -32,6 +35,9 @@ public:
 	
 	this( Tile[][] tiles, vec2d position, vec2i centre )
 	{
+		auto moment = cpMomentForBox(1, tiles[0].length, tiles.length );
+		physics = cpBodyNew( 1, moment );
+
 		_tiles = tiles;
 		SList!vec2i fnd_gy;
 		SList!vec2i fnd_th;
