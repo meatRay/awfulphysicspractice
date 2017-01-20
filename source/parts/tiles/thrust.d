@@ -49,9 +49,11 @@ public:
 	override void update( double delta_time )
 	{
 		super.update(delta_time);
-		float ang = cpBodyGetAngle(physics);
-		cpBodySetAngle(physics, ang+0.1);
-		auto rot = /+thrustDir+/cpBodyGetRot( physics ) * thrust; 
+		//float ang = cpBodyGetAngle(physics);
+		//cpBodySetAngle(physics, ang+delta_time);
+		auto rot = /+thrustDir+/cpBodyGetRot(physics) * thrust; 
+		//import std.stdio: writeln;
+		//writeln(cpBodyGetAngle(physics));
 		cpBodyApplyImpulse( physics, rot, cpVect(0f,0f));
 	}
 

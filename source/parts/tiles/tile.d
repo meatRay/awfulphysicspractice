@@ -13,6 +13,7 @@ public:
 	cpBody* physics;
 	cpShape* shape;
 	cpConstraint*[4] pins;
+	cpConstraint*[4] locks;
 	Render render;
 	Script[] scripts;
     TimedScript[] timedScripts;

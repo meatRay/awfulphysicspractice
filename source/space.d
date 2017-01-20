@@ -140,10 +140,12 @@ public:
 						cpSpaceAddBody(_space, tile.physics);
 						foreach( pin; tile.pins )
 							if( pin !is null )
-							{
 								if( cpConstraintGetSpace(pin) is null )
 									cpSpaceAddConstraint(_space, pin);
-							}
+						foreach( pin; tile.locks )
+							if( pin !is null )
+								if( cpConstraintGetSpace(pin) is null )
+									cpSpaceAddConstraint(_space, pin);
 					}
 			
 	}

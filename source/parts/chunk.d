@@ -99,6 +99,10 @@ public:
 					auto pin = cpPinJointNew(tiles[y][x].physics, targ.physics, cpVect(0,0), cpVect(0,0));
 					tiles[y][x].pins[i] = pin;
 					targ.pins[bck] = pin;
+
+					auto lock = cpRotaryLimitJointNew(tiles[y][x].physics, targ.physics, -0.01, 0.01);
+					tiles[y][x].locks[i] = lock;
+					targ.locks[bck] = lock;
 				}
 			}
 		_gyros = array( fnd_gy[] );

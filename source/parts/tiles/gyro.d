@@ -19,7 +19,9 @@ public:
 	override void update(double delta_time)
 	{
 		super.update(delta_time);
-		float ang = cpBodyGetAngle(physics);
-		cpBodySetAngle(physics, ang+0.1);
+		float ang = cpvtoangle(cpBodyGetRot(physics)) +0.1;
+		import std.stdio: writeln;
+		//writeln(ang);
+		cpBodySetAngle(physics, ang);
 	}
 }
