@@ -2,7 +2,7 @@ import ships.space;
 import ships.parts;
 import ships.parts.tiles;
 
-import std.stdio;
+//import std.stdio;
 
 void main()
 {
@@ -24,7 +24,7 @@ cast(Tile[])[ new Thrust, null, new Thrust ] ,
 [ null, new Tile('#'), null ],
 [ new Tile('#'), new Command, new Tile('#') ]];
 	auto ch = new Chunk( tiles );
-	writeln( ch.textRender() );
+	//writeln( ch.textRender() );
 
     auto wndw = new Renderer;
     wndw.space = new Space;

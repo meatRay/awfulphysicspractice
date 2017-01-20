@@ -5,7 +5,7 @@ import ships.space;
 
 import gl3n.linalg;
 
-import dchip;
+import dchip.all;
 
 import std.array;
 import std.container;
@@ -15,13 +15,20 @@ import std.algorithm;
 class Chunk
 {
 public:
-	@property const(Tile[][]) tiles(){ return _tiles; }
+	/+Find a way to return a Range from an Array..+/
+	@property Tile[][] tiles(){ return _tiles; }
 	@property bool functional(){ return _functional; }
-	vec2d position;
+	@property cpVect position()
+	{
+		return cpBodyGetPos(tileAt(commands[0]).physics);
+	}
 	double rotation = 0.0;
-	double speed = 0.0;
-	double targetspeed = 1.0;
-	cpBody* physics;
+	@property cpVect velocity()
+	{
+		return cpBodyGetVel(tileAt(commands[0]).physics);
+	}
+	double targetspeed = 0.2;
+	
 	
 	//Replace hard props with alias into Body access
 	//Chunk managed bounding boxes -- relays impact to data .. allows for event handlers to refresh state of systems
@@ -33,11 +40,31 @@ public:
 	@property const(vec2i[]) thrusts(){ return _thrusts; }
 	@property const(vec2i[]) commands(){ return _commands; }
 	
+	static vec2i numtodir( int num )
+	{
+		if( num == 0 ) 
+			return vec2i(1,0);
+		else if( num == 1 ) 
+			return vec2i(0,1);
+		else if( num == 2 ) 
+			return vec2i(-1,0);
+		else
+			return vec2i(0,-1);
+	}
+	static int dirtonum( vec2i dir )
+	{
+		if( dir == vec2i(1,0) ) 
+			return 0;
+		else if( dir == vec2i(0,1) )
+			return 1;
+		else if( dir == vec2i(-1,0) )
+			return 2;
+		else
+			return 3;
+	}
+
 	this( Tile[][] tiles, vec2d position, vec2i centre )
 	{
-		auto moment = cpMomentForBox(1, tiles[0].length, tiles.length );
-		physics = cpBodyNew( 1, moment );
-
 		_tiles = tiles;
 		SList!vec2i fnd_gy;
 		SList!vec2i fnd_th;
@@ -45,19 +72,40 @@ public:
 		for( int y = 0; y < tiles.length; ++y )
 			for( int x = 0; x < tiles[y].length; ++x )
 			{
+				if( tiles[y][x] is null )
+					continue;
+
 				if( cast(Gyro)tiles[y][x] )
 					fnd_gy.insert( vec2i(x,y) );
 				else if( cast(Thrust)tiles[y][x] )
 					fnd_th.insert( vec2i(x,y) );
 				else if( cast(Command)tiles[y][x] )
 					fnd_cm.insert( vec2i(x,y) );
+
+				for( int i = 0; i < 4; ++i )
+				{
+					auto dir = numtodir(i);
+					if( y+dir.y < 0 || x+dir.x < 0 )
+						continue;
+					if( y+dir.y >= tiles.length || x+dir.x >= tiles[0].length )
+						continue;
+					auto targ = tiles[y+dir.y][x+dir.x];
+					if(targ is null)
+						continue;
+					auto bck = dirtonum(dir*-1);
+					auto othrpin = targ.pins[bck];
+					if(othrpin !is null)
+						continue;
+					auto pin = cpPinJointNew(tiles[y][x].physics, targ.physics, cpVect(0,0), cpVect(0,0));
+					tiles[y][x].pins[i] = pin;
+					targ.pins[bck] = pin;
+				}
 			}
 		_gyros = array( fnd_gy[] );
 		_thrusts = array( fnd_th[] );
 		_commands = array( fnd_cm[] );
-		this.position = position;
+		//this.position = cpVect(position.x,position.y);
 		this.centre = centre;
-
 		_functional = true;
 	}
 	this( Tile[][] tiles, vec2d position = vec2d(0,0) )
@@ -72,22 +120,38 @@ public:
 		for( int y = 0; y < _tiles.length; ++y )
 			for( int x = 0; x < _tiles[y].length; ++x )
 				if( _tiles[y][x] !is null )
-					_tiles[y][x].render.draw(render, (x*32) + to!int(position.x), (y*32) + to!int(position.y));
+				{
+					Tile tile = _tiles[y][x];
+					tile.render.draw(render, (x*32) + to!int(tile.physics.p.x*32), (y*32) + to!int(tile.physics.p.y*32) );
+					//_tiles[y][x].render.draw(render, (x*32) + to!int(position.x), (y*32) + to!int(position.y));
+				}
 		//foreach( chunk; objects )
 			//chunk.draw(render);
 	}
 	
 	void update( float delta_time )
 	{
-		speed += thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust * 32).sum;
-		position.y += speed * delta_time;
+		/+auto speed = thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust * 1).sum;
+		auto cmd = tileAt(commands[0]).physics;
+		cpBodyApplyImpulse( cmd, cpVect(0f,speed), cpVect(0f,0f));+/
+
 		// Really might not be worth it... caching will just make stuff feel slow
 		if( _internalsTime += delta_time > internalsLifetime )
 			updateInternals();	
 		if( functional )
 		{
+			foreach( tileset; _tiles )
+				foreach( tile; tileset )
+				{
+					if( tile is null )
+						continue;
+					auto asthr = cast(Thrust)tile;
+					if( asthr )
+						asthr.thrust =(velocity.y < targetspeed) ? asthr.maxThrust : 0.0;
+					tile.update(delta_time);
+				}/+
 			foreach( thruster; thrusts.map!( t => (cast(Thrust)(tileAt(t)))) )
-				thruster.thrust =(speed < targetspeed) ? thruster.maxThrust : 0.0;
+				thruster.thrust =(velocity.y < targetspeed) ? thruster.maxThrust : 0.0;+/
 		}
 	}
 	void updateInternals()

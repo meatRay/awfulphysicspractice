@@ -5,9 +5,10 @@ import ships.parts;
 import derelict.sdl2.sdl;
 import derelict.sdl2.types;
 
-import dchip;
+import dchip.all;
 
 import std.container;
+import std.algorithm;
 
 import core.thread;
 
@@ -130,13 +131,26 @@ public:
 
 	void begin()
 	{
+		/+I failed my LINQfu... please  forgive me+/
 		foreach( chunk; objects )
-			cpSpaceAddBody(_space, chunk.physics);
+			foreach( tiles; chunk.tiles )
+				foreach( tile; tiles )
+					if( tile !is null )
+					{
+						cpSpaceAddBody(_space, tile.physics);
+						foreach( pin; tile.pins )
+							if( pin !is null )
+							{
+								if( cpConstraintGetSpace(pin) is null )
+									cpSpaceAddConstraint(_space, pin);
+							}
+					}
 			
 	}
 
 	void update( float delta_time )
 	{
+		cpSpaceStep(_space, delta_time);
 		foreach( object; objects )
 			object.update(delta_time);
 	}

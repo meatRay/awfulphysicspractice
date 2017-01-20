@@ -3,12 +3,14 @@ module ships.parts.tiles.thrust;
 import ships.parts.tiles;
 import ships.space;
 
+import dchip.all;
 import luad.state;
 
 class Thrust : Tile
 {
 public:
-	double maxThrust = 0.5;
+	double maxThrust = 0.1;
+	cpVect thrustDir = cpVect(0f,1f);
 	
 	@property double thrust(){ return functional ? _atThrust : 0.0; }
 	/+@property double thrustScale (){ return functional ? _atThrust : 0.0; }+/
@@ -43,6 +45,15 @@ public:
     {
         lua["thrustscale"] = &thrustScale;
     }
+
+	override void update( double delta_time )
+	{
+		super.update(delta_time);
+		float ang = cpBodyGetAngle(physics);
+		cpBodySetAngle(physics, ang+0.1);
+		auto rot = /+thrustDir+/cpBodyGetRot( physics ) * thrust; 
+		cpBodyApplyImpulse( physics, rot, cpVect(0f,0f));
+	}
 
 private:
 	double _atThrust = 0.0;

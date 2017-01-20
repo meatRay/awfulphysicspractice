@@ -3,11 +3,16 @@ module ships.parts.tiles.tile;
 import ships.scripting;
 import ships.space;
 
+import dchip.all;
+
 import luad.state;
 
 class Tile
 {
 public:
+	cpBody* physics;
+	cpShape* shape;
+	cpConstraint*[4] pins;
 	Render render;
 	Script[] scripts;
     TimedScript[] timedScripts;
@@ -33,13 +38,18 @@ public:
 		character = tile_char;
 		_durability = durability;
 		_damageThreshold = damage_threshold;
-		render = new BlankRender();	
+		render = new BlankRender();
+
+		auto moment = cpMomentForBox(1, 1, 1 );
+		physics = cpBodyNew( 1, moment );
+		shape = cpBoxShapeNew(physics, 1f, 1f);
+		//pins = new cpConstraint*
 	}
 
 	void update( double delta_time )
     {
         foreach( script; timedScripts )
-            script.update(delta_time); 
+            script.update(delta_time);
     }
     void regLuaCalls( LuaState lua )
     {
