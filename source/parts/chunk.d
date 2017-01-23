@@ -27,7 +27,7 @@ public:
 	{
 		return cpBodyGetVel(physics);
 	}
-	double targetspeed = 0.1;
+	double targetspeed = 0.0;
 
 	cpBody* physics;
 	
@@ -90,30 +90,6 @@ public:
 					fnd_th.insert( vec2i(x,y) );
 				else if( cast(Command)tiles[y][x] )
 					fnd_cm.insert( vec2i(x,y) );
-
-				/+for( int i = 0; i < 4; ++i )
-				{
-					auto dir = numtodir(i);
-					if( y+dir.y < 0 || x+dir.x < 0 )
-						continue;
-					if( y+dir.y >= tiles.length || x+dir.x >= tiles[0].length )
-						continue;
-					auto targ = tiles[y+dir.y][x+dir.x];
-					if(targ is null)
-						continue;
-					auto bck = dirtonum(dir*-1);
-					auto othrpin = targ.pins[bck];
-					if(othrpin !is null)
-						continue;
-					auto pin = cpPinJointNew(tiles[y][x].physics, targ.physics, cpVect(0,0), cpVect(0,0));
-					tiles[y][x].pins[i] = pin;
-					targ.pins[bck] = pin;
-
-					auto lock = cpPinJointNew(tiles[y][x].physics, targ.physics, cpVect(0,-1), cpVect(0,-1));
-					//auto lock = cpRotaryLimitJointNew(tiles[y][x].physics, targ.physics, -0.01, 0.01);
-					tiles[y][x].locks[i] = lock;
-					targ.locks[bck] = lock;
-				}+/
 			}
 		auto moment = cpMomentForBox(1, 1, 1 );
 		physics = cpBodyNew( 1, moment );
@@ -153,10 +129,6 @@ public:
 	void update( double delta_time )
 	{
 		accum +=delta_time;
-		if( accum < 2.0 )
-			(cast(Gyro)tileAt(gyros[0])).torque = delta_time*20;
-		else
-			(cast(Gyro)tileAt(gyros[0])).torque = 0.0;
 		auto speed = thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust).sum;
 		/+auto cmd = tileAt(commands[0]).physics;+/
 		auto rot = cpBodyGetRot(physics) * speed;
@@ -175,9 +147,9 @@ public:
 				{
 					if( tile is null )
 						continue;
-					auto asthr = cast(Thrust)tile;
+					/+auto asthr = cast(Thrust)tile;
 					if( asthr )
-						asthr.thrust =(velocity.y < targetspeed) ? asthr.maxThrust : 0.0;
+						asthr.thrust =(velocity.y < targetspeed) ? asthr.maxThrust : 0.0;+/
 					tile.update(delta_time);
 				}/+
 			foreach( thruster; thrusts.map!( t => (cast(Thrust)(tileAt(t)))) )

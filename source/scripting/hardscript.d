@@ -1,9 +1,9 @@
-module ships.scripting.livescript;
+module ships.scripting.hardscript;
 
 import ships.scripting.script;
 import ships.parts.tiles.tile;
 
-class LiveScript : Script
+class HardScript : Script
 {
 public:
     override Packet endpoint()
@@ -13,8 +13,8 @@ public:
         return lua["endpoint"].to!Packet;
     }
 
-    this( Tile instance, string script_text )
+    this( Tile instance )
     {
-        super(instance, script_text);
+        super(instance, ``);
     }
 }

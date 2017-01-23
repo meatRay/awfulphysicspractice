@@ -14,23 +14,17 @@ public:
     string luaName;
     Script[] inpoints;
     abstract Packet endpoint();
-    string script;
+    LuaFunction script;
 protected:
     LuaState lua;
     Tile instance;
 
 public:
-    this( Tile instance )
+    this( Tile instance, string script_text )
     {
         this.instance = instance;
-        lua = new LuaState();
-        lua.openLibs();
-        instance.regLuaCalls(lua);
-    }
-    string dothing()
-    {
-        lua.doString( script );
-        return lua["endpoint"].to!string;
+        loadWorkspace(true);
+        script = lua.loadString(script_text);
     }
 protected:
     void loadWorkspace(bool from_scratch = false)

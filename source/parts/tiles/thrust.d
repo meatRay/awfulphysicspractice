@@ -2,14 +2,18 @@ module ships.parts.tiles.thrust;
 
 import ships.parts.tiles;
 import ships.space;
+import ships.scripting.script;
 
 import dchip.all;
+
 import luad.state;
+
+import std.conv : to;
 
 class Thrust : Tile
 {
 public:
-	double maxThrust = 0.01;
+	double maxThrust = 0.1;
 	cpVect thrustDir = cpVect(0f,1f);
 	
 	@property double thrust(){ return functional ? _atThrust : 0.0; }
@@ -22,6 +26,12 @@ public:
 			_atThrust = thrust;
 		/+_atScale = maxThrust / _atThrust;+/
 		return _atThrust;
+	}
+	@property double thrustScale()
+	{
+		//import std.stdio : writefln;
+		//writefln("Thrust: %f, Max: %f, Value: %f", _atThrust, maxThrust, _atThrust / maxThrust);
+		return _atThrust <= 0 ? 0.0 : _atThrust / maxThrust;
 	}
 	@property double thrustScale( double scale )
 	{
@@ -43,7 +53,7 @@ public:
 	
     override void regLuaCalls( LuaState lua )
     {
-        lua["thrustscale"] = &thrustScale;
+        lua["ThrustScale"] = &scriptSetThrust;
     }
 
 	override void update( double delta_time )
@@ -51,7 +61,16 @@ public:
 		super.update(delta_time);
 	}
 
+	override Packet hardpoint()
+	{
+		return["thrust":to!string(thrustScale)];
+	}
+
 private:
+	void scriptSetThrust(double value)
+	{
+		thrustScale = value;
+	}
 	double _atThrust = 0.0;
 	/+double _atScale;+/
 }

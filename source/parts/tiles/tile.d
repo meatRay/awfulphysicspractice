@@ -60,6 +60,7 @@ public:
     {
         lua["fire"] = &fire;
     }
+	Packet hardpoint(){ return null; }
 
 private:
     void fire()
@@ -67,9 +68,7 @@ private:
         //writeln("BOOM");
     }
 
-protected:
-	public/+abstract+/ Packet hardpoint(){ return null; }
-	
+protected:	
 	public void damage( int damage )
 	{
 		_damage += damage;
