@@ -154,9 +154,9 @@ public:
 	{
 		accum +=delta_time;
 		if( accum < 2.0 )
-			(cast(Gyro)tileAt(gyros[0])).torque = 0.0;
-		else
 			(cast(Gyro)tileAt(gyros[0])).torque = delta_time*20;
+		else
+			(cast(Gyro)tileAt(gyros[0])).torque = 0.0;
 		auto speed = thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust).sum;
 		/+auto cmd = tileAt(commands[0]).physics;+/
 		auto rot = cpBodyGetRot(physics) * speed;
