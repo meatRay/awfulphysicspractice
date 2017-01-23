@@ -9,8 +9,8 @@ public:
 	this()
 	{
 		super('C');
-		auto bsc = cast(BlankRender)this.render;
+		/+auto bsc = cast(BlankRender)this.render;
 		bsc.b = 0;
-		bsc.g = 0;
+		bsc.g = 0;+/
 	}
 }

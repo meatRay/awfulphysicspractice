@@ -18,17 +18,14 @@ void main()
 
 
 	auto tiles = [ 
-cast(Tile[])[ new Thrust, null, new Thrust ] ,
-[ new Tile('#'), new Tile('#'), new Tile('#') ],
-[ new Tile('#'), new Gyro, new Tile('#') ],
-[ null, new Tile('#'), null ],
-[ new Tile('#'), new Command, new Tile('#') ]];
+[new Thrust, new Tile('#'), new Tile('#'), null         , new Tile('#')],
+[null      , new Tile('#'), new Gyro     , new Tile('#'), new Command  ],
+[new Thrust, new Tile('#'), new Tile('#'), null         , new Tile('#')]];
 	auto ch = new Chunk( tiles );
 	//writeln( ch.textRender() );
 
     auto wndw = new Renderer;
     wndw.space = new Space;
     wndw.space.objects.insert(ch);
-    wndw.space.begin();
     wndw.begin();
 }

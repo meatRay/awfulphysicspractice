@@ -9,7 +9,7 @@ import luad.state;
 class Thrust : Tile
 {
 public:
-	double maxThrust = 0.1;
+	double maxThrust = 0.01;
 	cpVect thrustDir = cpVect(0f,1f);
 	
 	@property double thrust(){ return functional ? _atThrust : 0.0; }
@@ -36,9 +36,9 @@ public:
 	this()
 	{
 		super('T');
-		auto bsc = cast(BlankRender)this.render;
+		/+auto bsc = cast(BlankRender)this.render;
 		bsc.r = 0;
-		bsc.g = 0;
+		bsc.g = 0;+/
 	}
 	
     override void regLuaCalls( LuaState lua )
@@ -49,12 +49,6 @@ public:
 	override void update( double delta_time )
 	{
 		super.update(delta_time);
-		//float ang = cpBodyGetAngle(physics);
-		//cpBodySetAngle(physics, ang+delta_time);
-		auto rot = /+thrustDir+/cpBodyGetRot(physics) * thrust; 
-		//import std.stdio: writeln;
-		//writeln(cpBodyGetAngle(physics));
-		cpBodyApplyImpulse( physics, rot, cpVect(0f,0f));
 	}
 
 private:

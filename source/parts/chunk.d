@@ -20,15 +20,24 @@ public:
 	@property bool functional(){ return _functional; }
 	@property cpVect position()
 	{
-		return cpBodyGetPos(tileAt(commands[0]).physics);
+		return cpBodyGetPos(physics);
 	}
 	double rotation = 0.0;
 	@property cpVect velocity()
 	{
-		return cpBodyGetVel(tileAt(commands[0]).physics);
+		return cpBodyGetVel(physics);
 	}
-	double targetspeed = 0.2;
+	double targetspeed = 0.1;
+
+	cpBody* physics;
 	
+	void begin()
+	{
+		foreach( tilech ; tiles )
+			foreach( tile ; tilech )
+				if( tile !is null )
+					cpBodyAddShape(physics, tile.shape);
+	}
 	
 	//Replace hard props with alias into Body access
 	//Chunk managed bounding boxes -- relays impact to data .. allows for event handlers to refresh state of systems
@@ -82,7 +91,7 @@ public:
 				else if( cast(Command)tiles[y][x] )
 					fnd_cm.insert( vec2i(x,y) );
 
-				for( int i = 0; i < 4; ++i )
+				/+for( int i = 0; i < 4; ++i )
 				{
 					auto dir = numtodir(i);
 					if( y+dir.y < 0 || x+dir.x < 0 )
@@ -100,11 +109,14 @@ public:
 					tiles[y][x].pins[i] = pin;
 					targ.pins[bck] = pin;
 
-					auto lock = cpRotaryLimitJointNew(tiles[y][x].physics, targ.physics, -0.01, 0.01);
+					auto lock = cpPinJointNew(tiles[y][x].physics, targ.physics, cpVect(0,-1), cpVect(0,-1));
+					//auto lock = cpRotaryLimitJointNew(tiles[y][x].physics, targ.physics, -0.01, 0.01);
 					tiles[y][x].locks[i] = lock;
 					targ.locks[bck] = lock;
-				}
+				}+/
 			}
+		auto moment = cpMomentForBox(1, 1, 1 );
+		physics = cpBodyNew( 1, moment );
 		_gyros = array( fnd_gy[] );
 		_thrusts = array( fnd_th[] );
 		_commands = array( fnd_cm[] );
@@ -126,18 +138,32 @@ public:
 				if( _tiles[y][x] !is null )
 				{
 					Tile tile = _tiles[y][x];
-					tile.render.draw(render, (x*32) + to!int(tile.physics.p.x*32), (y*32) + to!int(tile.physics.p.y*32) );
+					double ang = cpBodyGetAngle(physics);// * 57.2958;
+					int d_x = (x-centre.x)*32;
+					d_x += to!int(physics.p.x*32);
+					int d_y = (y-centre.y)*32;
+					d_y += to!int(physics.p.y*32);
+					tile.render.draw(render, d_x, d_y, ang, centre, to!int(physics.p.x*32), to!int(physics.p.y*32) );
 					//_tiles[y][x].render.draw(render, (x*32) + to!int(position.x), (y*32) + to!int(position.y));
 				}
 		//foreach( chunk; objects )
 			//chunk.draw(render);
 	}
-	
-	void update( float delta_time )
+	double accum = 0.0;
+	void update( double delta_time )
 	{
-		/+auto speed = thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust * 1).sum;
-		auto cmd = tileAt(commands[0]).physics;
-		cpBodyApplyImpulse( cmd, cpVect(0f,speed), cpVect(0f,0f));+/
+		accum +=delta_time;
+		if( accum < 2.0 )
+			(cast(Gyro)tileAt(gyros[0])).torque = 0.0;
+		else
+			(cast(Gyro)tileAt(gyros[0])).torque = delta_time*20;
+		auto speed = thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust).sum;
+		/+auto cmd = tileAt(commands[0]).physics;+/
+		auto rot = cpBodyGetRot(physics) * speed;
+		cpBodyApplyImpulse( physics, rot, cpVect(0f,0f));
+
+		auto ang = cpBodyGetAngle(physics);
+		cpBodySetAngle(physics, ang+gyros.map!(g => (cast(Gyro)(tileAt(g))).torque).sum);
 
 		// Really might not be worth it... caching will just make stuff feel slow
 		if( _internalsTime += delta_time > internalsLifetime )

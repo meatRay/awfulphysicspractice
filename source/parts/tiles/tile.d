@@ -10,10 +10,10 @@ import luad.state;
 class Tile
 {
 public:
-	cpBody* physics;
+	//cpBody* physics;
 	cpShape* shape;
-	cpConstraint*[4] pins;
-	cpConstraint*[4] locks;
+	//cpConstraint*[4] pins;
+	//cpConstraint*[4] locks;
 	Render render;
 	Script[] scripts;
     TimedScript[] timedScripts;
@@ -39,12 +39,16 @@ public:
 		character = tile_char;
 		_durability = durability;
 		_damageThreshold = damage_threshold;
-		render = new BlankRender();
 
-		auto moment = cpMomentForBox(1, 1, 1 );
-		physics = cpBodyNew( 1, moment );
-		shape = cpBoxShapeNew(physics, 1f, 1f);
-		//pins = new cpConstraint*
+		render = new TexRender("box.png");
+	}
+
+	void physicsInit(cpBody* physics, int x, int y)
+	{
+		//auto moment = cpMomentForBox(1, 1, 1 );
+		//physics = cpBodyNew( 1, moment );
+		auto bb = cpBB(x, y, x+1, y+1);
+		shape = cpBoxShapeNew2(physics, bb);
 	}
 
 	void update( double delta_time )
