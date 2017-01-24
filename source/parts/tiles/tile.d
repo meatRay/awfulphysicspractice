@@ -7,6 +7,8 @@ import dchip.all;
 
 import luad.state;
 
+import std.conv : to;
+
 class Tile
 {
 public:
@@ -23,7 +25,7 @@ public:
 	@property int durability(){ return _durability; }
 	@property int strength(){ return _durability - _damage; }
 	@property int damageThreshold(){ return _damageThreshold; }
-	@property bool destroyed(){ return _damage < _durability; }
+	@property bool destroyed(){ return _damage >= _durability; }
 	@property bool functional(){ return _damage < _damageThreshold; }
 	@property bool active(){ return functional && enabled; }
 	
@@ -78,7 +80,12 @@ private:
 			_damage = _durability;
 		else if( _damage < 0 )
 			_damage = 0;
-		//Alter sprite / state
+		double hlth = to!double(strength) / to!double(_durability);
+
+		TexRender rndr = cast(TexRender)render;
+
+		rndr.b = cast(byte)(255.0 * hlth);
+		rndr.g = cast(byte)(255.0 * hlth);
 	}
 	
 private:

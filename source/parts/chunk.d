@@ -148,18 +148,26 @@ public:
 			updateInternals();	
 		if( functional )
 		{
-			foreach( ref tileset; _tiles )
-				foreach( ref tile; tileset )
+			for( int y = 0; y < _tiles.length; ++y )
+				for( int x = 0; x < _tiles[0].length; ++x )
 				{
+					auto tile = tileAt(x,y);
 					if( tile is null )
 						continue;
 
 					tile.update(delta_time);
-					if( !tile.functional )
+					if( tile.destroyed )
 					{
 						cpSpaceRemoveShape(space, tile.shape);
 						cpShapeFree(tile.shape);
-						tile = null;
+						if( cast(Thrust)tile )
+							_thrusts = array( _thrusts.filter!(g => g != vec2i(x,y)) );
+						if( cast(Gyro)tile )
+							_gyros = array( _gyros.filter!(g => g != vec2i(x,y)) );
+						if( cast(Command)tile )
+							_commands = array( _commands.filter!(g => g != vec2i(x,y)) );
+
+						tiles[y][x] = null;
 					}
 					/+auto asthr = cast(Thrust)tile;
 					if( asthr )

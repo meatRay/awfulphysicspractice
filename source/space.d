@@ -12,6 +12,7 @@ import gl3n.linalg;
 
 import std.container;
 import std.algorithm;
+import std.conv;
 
 import core.thread;
 
@@ -32,7 +33,7 @@ public:
 		if( SDL_Init(SDL_INIT_VIDEO) )
 			throw new Exception("SDL Failed to Initialize.");
 
-		_window = SDL_CreateWindow("SHIPS", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
+		_window = SDL_CreateWindow("SHIPS", 100, 100, 640, 640, SDL_WINDOW_SHOWN);
 		if( _window is null )
 			throw new Exception("SDL Failed to Create a Window.");
 
@@ -113,11 +114,15 @@ public:
 class TexRender : Render
 {
 public:
+	byte r, g, b;
 	@property string filepath(){ return _filepath; }
 
 	this(string path)
 	{
 		_filepath = path;
+		r = cast(byte)255;
+		g = cast(byte)255;
+		b = cast(byte)255;
 	}
 
 	override void load(SDL_Renderer* render)
@@ -140,6 +145,7 @@ public:
 
 	override void draw(SDL_Renderer* render, int x, int y, double angle, vec2i centre, int r_x, int r_y)
 	{
+		SDL_SetTextureColorMod( _tex, r, g, b );
 		auto rect = SDL_Rect(x,y,32,32);
 		SDL_Rect* othr = null;
 		//SDL_Point ayy = SDL_Point(x-(centre.x*32),y-(centre.y*32));
@@ -195,10 +201,15 @@ public:
 
 	void begin(SDL_Renderer* render)
 	{
-		/+cpShape* ground = cpSegmentShapeNew(_space.staticBody, cpv(12, -10), cpv(13, 10), 0);
-		cpShapeSetFriction(ground, 0.5);
-		cpShapeSetElasticity(ground, 0.5f);
-		cpSpaceAddShape(_space, ground);+/
+		cpShape* ground = cpSegmentShapeNew(_space.staticBody, cpv(20, -1), cpv(20, 20), 0);
+		cpSpaceAddShape(_space, ground);
+		ground = cpSegmentShapeNew(_space.staticBody, cpv(-1, -1), cpv(20, -1), 0);
+		cpSpaceAddShape(_space, ground);
+		ground = cpSegmentShapeNew(_space.staticBody, cpv(-1, -1), cpv(-1, 20), 0);
+		cpSpaceAddShape(_space, ground);
+		ground = cpSegmentShapeNew(_space.staticBody, cpv(-1, 20), cpv(20, 20), 0);
+		cpSpaceAddShape(_space, ground);
+		
 		/+I failed my LINQfu... please  forgive me+/
 		foreach( chunk; objects )
 		{
@@ -226,7 +237,7 @@ public:
 
 			cpSpaceAddBody(_space, chunk.physics);
 		}
-		cpSpaceAddCollisionHandler( _space, CollideTypes.SHIP, CollideTypes.SHIP, bindDelegate(&collide), null, null, null, null );
+		cpSpaceAddCollisionHandler( _space, CollideTypes.SHIP, CollideTypes.SHIP, null, null, bindDelegate(&collide), null, null );
 	}
 		// transform delegate into pointer..
 	import std.traits;
@@ -243,7 +254,7 @@ public:
 			return &func;
 	}
 
-	bool collide(cpArbiter* arb, cpSpace* space, void* data)
+	void collide(cpArbiter* arb, cpSpace* space, void* data)
 	{
 		mixin(CP_ARBITER_GET_SHAPES!("arb", "shape_a", "shape_b"));
 		auto body_a = cpShapeGetBody(shape_a);
@@ -279,9 +290,13 @@ import ships.parts.tiles.tile;
 				break;
 			}
 
-		tile_a.damage(1);
-		tile_b.damage(1);
-		return true;
+		double intense = cpvlength( cpArbiterTotalImpulse(arb) );
+		//writeln( intense );
+		int ints = to!int( intense / 10.0 );
+
+		tile_a.damage(ints);
+		tile_b.damage(ints);
+		//return true;
 	}
 	void update( float delta_time )
 	{

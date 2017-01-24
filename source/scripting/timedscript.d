@@ -46,6 +46,8 @@ protected:
         {
             lua["Delay"] = &scriptDelay;
             lua["ResetDelay"] = &scriptReset;
+            lua["DelayN"] = &scriptDelayFor;
+            lua["ResetDelayN"] = &scriptResetFor;
         }
     }
 
