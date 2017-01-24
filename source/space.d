@@ -17,6 +17,8 @@ import core.thread;
 
 public alias RenderContext = SDL_Renderer*;
 
+enum CollideTypes{ NONE, SHIP }
+
 class Renderer
 {
 public:
@@ -41,6 +43,8 @@ public:
 		DerelictSDL2Image.load();
 		if( !( IMG_Init( IMG_INIT_PNG ) & IMG_INIT_PNG ) )
 			throw new Exception( "SDL_image could not initialize! SDL_image Error: %s\n" );
+
+		SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "2" );
 
 		scope( failure )
 			destroy( this );
@@ -145,7 +149,7 @@ public:
 			_tex,
 			othr,
 			&rect,
-			-angle,
+			angle,
 			&ayy,
 			SDL_FLIP_NONE );
 	}
@@ -186,15 +190,15 @@ public:
 	this() 
 	{
 		_space = cpSpaceNew();
-		cpSpaceSetGravity(_space, cpv(0f, 9.8f));
+		cpSpaceSetGravity(_space, cpv(0f, 0f));
 	}
 
 	void begin(SDL_Renderer* render)
 	{
-		cpShape* ground = cpSegmentShapeNew(_space.staticBody, cpv(-10, 6), cpv(10, 11), 0);
+		/+cpShape* ground = cpSegmentShapeNew(_space.staticBody, cpv(12, -10), cpv(13, 10), 0);
 		cpShapeSetFriction(ground, 0.5);
 		cpShapeSetElasticity(ground, 0.5f);
-		cpSpaceAddShape(_space, ground);
+		cpSpaceAddShape(_space, ground);+/
 		/+I failed my LINQfu... please  forgive me+/
 		foreach( chunk; objects )
 		{
@@ -207,7 +211,7 @@ public:
 						tile.physicsInit(chunk.physics, x-chunk.centre.x,y-chunk.centre.y);
 						tile.render.load(render);
 						cpSpaceAddShape(_space, tile.shape);
-						
+						cpShapeSetCollisionType(tile.shape, CollideTypes.SHIP);
 						/+foreach( pin; tile.pins )
 							if( pin !is null )
 								if( cpConstraintGetSpace(pin) is null )
@@ -219,15 +223,71 @@ public:
 					}
 				}
 			chunk.begin();
+
 			cpSpaceAddBody(_space, chunk.physics);
 		}
+		cpSpaceAddCollisionHandler( _space, CollideTypes.SHIP, CollideTypes.SHIP, bindDelegate(&collide), null, null, null, null );
+	}
+		// transform delegate into pointer..
+	import std.traits;
+	auto bindDelegate(T, string file = __FILE__, size_t line = __LINE__)(T t) if(isDelegate!T) {
+			static T dg;
+
+			dg = t;
+
+			//extern(C)
+			static ReturnType!T func(ParameterTypeTuple!T args) {
+					return dg(args);
+			}
+
+			return &func;
 	}
 
+	bool collide(cpArbiter* arb, cpSpace* space, void* data)
+	{
+		mixin(CP_ARBITER_GET_SHAPES!("arb", "shape_a", "shape_b"));
+		auto body_a = cpShapeGetBody(shape_a);
+		auto body_b = cpShapeGetBody(shape_b);
+		Chunk chunk_a;
+		Chunk chunk_b;
+		foreach( object; objects )
+			if (object.physics == body_a)
+			{
+				chunk_a = object;
+				break;
+			}
+		foreach( object; objects )
+			if (object.physics == body_b)
+			{
+				chunk_b = object;
+				break;
+			}
+import ships.parts.tiles.tile;
+		Tile tile_a;
+		Tile tile_b;
+
+		foreach( tile; chunk_a.tiles.joiner.filter!"a !is null" )
+			if( tile.shape == shape_a )
+			{
+				tile_a = tile;
+				break;
+			}
+		foreach( tile; chunk_b.tiles.joiner.filter!"a !is null" )
+			if( tile.shape == shape_b )
+			{
+				tile_b = tile;
+				break;
+			}
+
+		tile_a.damage(1);
+		tile_b.damage(1);
+		return true;
+	}
 	void update( float delta_time )
 	{
 		cpSpaceStep(_space, delta_time);
 		foreach( object; objects )
-			object.update(delta_time);
+			object.update(_space, delta_time);
 	}
 
 	void draw(SDL_Renderer* render)

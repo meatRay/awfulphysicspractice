@@ -13,8 +13,8 @@ import std.conv : to;
 class Thrust : Tile
 {
 public:
-	double maxThrust = 0.1;
-	cpVect thrustDir = cpVect(0f,1f);
+	double maxThrust = 0.5;
+	//cpVect thrustDir = cpVect(0f,1f);
 	
 	@property double thrust(){ return functional ? _atThrust : 0.0; }
 	/+@property double thrustScale (){ return functional ? _atThrust : 0.0; }+/

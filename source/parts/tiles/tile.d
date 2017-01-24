@@ -47,7 +47,7 @@ public:
 	{
 		//auto moment = cpMomentForBox(1, 1, 1 );
 		//physics = cpBodyNew( 1, moment );
-		auto bb = cpBB(x, y, x+1, y+1);
+		auto bb = cpBB(x-0.5, y-0.5, x+0.5, y+0.5);
 		shape = cpBoxShapeNew2(physics, bb);
 		cpShapeSetFriction(shape, 0.5f);
 		cpShapeSetElasticity(shape, 0.5f);
@@ -70,7 +70,7 @@ private:
         //writeln("BOOM");
     }
 
-protected:	
+//protected:	
 	public void damage( int damage )
 	{
 		_damage += damage;

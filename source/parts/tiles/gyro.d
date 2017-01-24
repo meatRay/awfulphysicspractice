@@ -3,12 +3,25 @@ module ships.parts.tiles.gyro;
 import ships.parts.tiles;
 import ships.space;
 
+import luad.state;
+
 import dchip.all;
+
+import std.math;
 
 class Gyro : Tile
 {
 public:
-	double torque = 0.0;
+	double maxTorque = PI_4;
+	@property double torque(){ return functional ? _torque : 0.0; }
+
+	@property double torqueScale(double scale)
+	{
+		if( scale > 1 )
+			scale = 1;
+		_torque = maxTorque * scale;
+		return scale;
+	}
 
 	this()
 	{
@@ -26,5 +39,17 @@ public:
 		import std.stdio: writeln;
 		writeln(ang);
 		cpBodySetAngle(physics, ang);+/
+	}
+
+	override void regLuaCalls( LuaState lua )
+    {
+        lua["Spin"] = &scriptSpin;
+    }
+
+private:
+	double _torque = 0.0;
+	void scriptSpin( double torque )
+	{
+		torqueScale(torque);
 	}
 }

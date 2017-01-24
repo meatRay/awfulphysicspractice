@@ -72,7 +72,7 @@ public:
 			return 3;
 	}
 
-	this( Tile[][] tiles, vec2d position, vec2i centre )
+	this( Tile[][] tiles, vec2d position, double rotation, vec2i centre )
 	{
 		_tiles = tiles;
 		SList!vec2i fnd_gy;
@@ -93,18 +93,23 @@ public:
 			}
 		//auto moment = cpMomentForBox(/+tiles.map!"a.length".sum+/100, tiles.length, tiles[0].length );
 		physics = cpBodyNew( 100, 0.1f );
+		cpBodySetPos( physics, cpv(position.x, position.y) );
+		cpBodySetAngle( physics, rotation );
 		_gyros = array( fnd_gy[] );
 		_thrusts = array( fnd_th[] );
 		_commands = array( fnd_cm[] );
 		//this.position = cpVect(position.x,position.y);
 		this.centre = centre;
+		double c_x = to!double(_gyros.map!"a.x".sum) / _gyros.length;
+		double c_y = to!double(_gyros.map!"a.y".sum) / _gyros.length;
+		this.centre = vec2i( to!int(c_x), to!int(c_y) );
 		_functional = true;
 	}
-	this( Tile[][] tiles, vec2d position = vec2d(0,0) )
+	this( Tile[][] tiles, vec2d position = vec2d(0,0), double rotation = 0.0 )
 		//:this( tiles, position, estimateCentre(tiles) )
 	{
 		vec2i estimate = vec2i( tiles[0].length / 2, tiles.length / 2 );
-		this( tiles, position, estimate );
+		this( tiles, position, rotation, estimate );
 	}
 
 	void draw(RenderContext render)
@@ -114,7 +119,7 @@ public:
 				if( _tiles[y][x] !is null )
 				{
 					Tile tile = _tiles[y][x];
-					double ang = cpBodyGetAngle(physics);// * 57.2958;
+					double ang = cpBodyGetAngle(physics) * 57.2958;
 					int d_x = (x-centre.x)*32;
 					d_x += to!int(physics.p.x*32);
 					int d_y = (y-centre.y)*32;
@@ -126,7 +131,7 @@ public:
 			//chunk.draw(render);
 	}
 	double accum = 0.0;
-	void update( double delta_time )
+	void update( cpSpace* space, double delta_time )
 	{
 		accum +=delta_time;
 		auto speed = thrusts.map!(t => (cast(Thrust)(tileAt(t))).thrust).sum;
@@ -135,22 +140,30 @@ public:
 		cpBodyApplyImpulse( physics, rot, cpVect(0f,0f));
 
 		auto ang = cpBodyGetAngle(physics);
-		//cpBodySetAngle(physics, ang+gyros.map!(g => (cast(Gyro)(tileAt(g))).torque).sum);
+		auto tor = gyros.map!(g => (cast(Gyro)(tileAt(g))).torque).sum;
+		cpBodySetAngVel(physics, tor);
 
 		// Really might not be worth it... caching will just make stuff feel slow
 		if( _internalsTime += delta_time > internalsLifetime )
 			updateInternals();	
 		if( functional )
 		{
-			foreach( tileset; _tiles )
-				foreach( tile; tileset )
+			foreach( ref tileset; _tiles )
+				foreach( ref tile; tileset )
 				{
 					if( tile is null )
 						continue;
+
+					tile.update(delta_time);
+					if( !tile.functional )
+					{
+						cpSpaceRemoveShape(space, tile.shape);
+						cpShapeFree(tile.shape);
+						tile = null;
+					}
 					/+auto asthr = cast(Thrust)tile;
 					if( asthr )
 						asthr.thrust =(velocity.y < targetspeed) ? asthr.maxThrust : 0.0;+/
-					tile.update(delta_time);
 				}/+
 			foreach( thruster; thrusts.map!( t => (cast(Thrust)(tileAt(t)))) )
 				thruster.thrust =(velocity.y < targetspeed) ? thruster.maxThrust : 0.0;+/
