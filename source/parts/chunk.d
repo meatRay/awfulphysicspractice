@@ -91,8 +91,8 @@ public:
 				else if( cast(Command)tiles[y][x] )
 					fnd_cm.insert( vec2i(x,y) );
 			}
-		auto moment = cpMomentForBox(1, 1, 1 );
-		physics = cpBodyNew( 1, moment );
+		//auto moment = cpMomentForBox(/+tiles.map!"a.length".sum+/100, tiles.length, tiles[0].length );
+		physics = cpBodyNew( 100, 0.1f );
 		_gyros = array( fnd_gy[] );
 		_thrusts = array( fnd_th[] );
 		_commands = array( fnd_cm[] );
@@ -135,7 +135,7 @@ public:
 		cpBodyApplyImpulse( physics, rot, cpVect(0f,0f));
 
 		auto ang = cpBodyGetAngle(physics);
-		cpBodySetAngle(physics, ang+gyros.map!(g => (cast(Gyro)(tileAt(g))).torque).sum);
+		//cpBodySetAngle(physics, ang+gyros.map!(g => (cast(Gyro)(tileAt(g))).torque).sum);
 
 		// Really might not be worth it... caching will just make stuff feel slow
 		if( _internalsTime += delta_time > internalsLifetime )

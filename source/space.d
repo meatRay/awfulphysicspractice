@@ -145,7 +145,7 @@ public:
 			_tex,
 			othr,
 			&rect,
-			angle,
+			-angle,
 			&ayy,
 			SDL_FLIP_NONE );
 	}
@@ -186,11 +186,15 @@ public:
 	this() 
 	{
 		_space = cpSpaceNew();
-		cpSpaceSetGravity(_space, cpv(0f, 0f));
+		cpSpaceSetGravity(_space, cpv(0f, 9.8f));
 	}
 
 	void begin(SDL_Renderer* render)
 	{
+		cpShape* ground = cpSegmentShapeNew(_space.staticBody, cpv(-10, 6), cpv(10, 11), 0);
+		cpShapeSetFriction(ground, 0.5);
+		cpShapeSetElasticity(ground, 0.5f);
+		cpSpaceAddShape(_space, ground);
 		/+I failed my LINQfu... please  forgive me+/
 		foreach( chunk; objects )
 		{
@@ -202,6 +206,7 @@ public:
 					{
 						tile.physicsInit(chunk.physics, x-chunk.centre.x,y-chunk.centre.y);
 						tile.render.load(render);
+						cpSpaceAddShape(_space, tile.shape);
 						
 						/+foreach( pin; tile.pins )
 							if( pin !is null )

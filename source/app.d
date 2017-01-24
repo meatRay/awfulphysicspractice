@@ -18,13 +18,17 @@ void main()
     tile.scripts = [ sensor ];+/
 
     auto thr1 = new Thrust;
-    auto mover1 = new TimedScript(thr1, `
+    /*auto mover1 = new TimedScript(thr1, `
 local thrust = tonumber(instance["thrust"])
-if thrust <= 0.9 then
+do_run = true
+if thrust <= 0.3 and do_run then
     ThrustScale( thrust+0.1 )
+    do_run = false;
+else
+    ThrustScale( 0.0 );
 end`, 0.1);
     thr1.scripts = [mover1];
-    thr1.timedScripts = [mover1];
+    thr1.timedScripts = [mover1];*/
 
     auto thr2 = new Thrust;
     /+auto mover2 = new TimedScript(thr2, `

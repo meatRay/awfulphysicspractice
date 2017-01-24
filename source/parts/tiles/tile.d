@@ -49,6 +49,8 @@ public:
 		//physics = cpBodyNew( 1, moment );
 		auto bb = cpBB(x, y, x+1, y+1);
 		shape = cpBoxShapeNew2(physics, bb);
+		cpShapeSetFriction(shape, 0.5f);
+		cpShapeSetElasticity(shape, 0.5f);
 	}
 
 	void update( double delta_time )
